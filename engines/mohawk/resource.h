@@ -123,6 +123,14 @@ namespace Mohawk {
 #define ID_BBOX MKTAG('B','B','O','X') // Boxes? (CSWorld, CSAmtrak)
 #define ID_SYSX MKTAG('S','Y','S','X') // MIDI Sysex
 
+const int Riven_Scale = 2;
+const int Riven_ScreenWidth = 608 * Riven_Scale;
+const int Riven_ScreenHeight = 436 * Riven_Scale;
+const int Riven_MainWidth = Riven_ScreenWidth;
+const int Riven_MainHeight = 392 * Riven_Scale;
+const int Riven_InventoryTop = Riven_MainHeight;
+const int Riven_InventoryBottom = Riven_ScreenHeight;
+
 
 class Archive {
 public:
@@ -159,6 +167,7 @@ protected:
 	typedef Common::HashMap<uint16, Resource> ResourceMap;
 	typedef Common::HashMap<uint32, ResourceMap> TypeMap;
 	TypeMap _types;
+	Common::String ArchiveName;
 };
 
 class MohawkArchive : public Archive {

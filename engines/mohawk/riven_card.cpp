@@ -256,7 +256,7 @@ void RivenCard::applyPropertiesPatch2E76(uint32 globalId) {
 		Picture blackPicture;
 		blackPicture.index = 6;
 		blackPicture.id = 117;
-		blackPicture.rect = Common::Rect(608, 392);
+		blackPicture.rect = Common::Rect(Riven_MainWidth, Riven_MainHeight);
 		_pictureList.push_back(blackPicture);
 
 		debugC(kRivenDebugPatches, "Applied invalid card change during screen update (1/2) to card %x", globalId);
@@ -571,8 +571,12 @@ void RivenCard::moveHotspot(uint16 blstId, const Common::Rect &position) {
 		warning("Could not find hotspot with blstId %d", blstId);
 		return;
 	}
-
-	hotspot->setRect(position);
+	Common::Rect LPos;
+	LPos.left = position.left * Riven_Scale;
+	LPos.right = position.right * Riven_Scale;
+	LPos.top = position.top * Riven_Scale;
+	LPos.bottom = position.bottom * Riven_Scale;
+	hotspot->setRect(LPos);
 }
 
 void RivenCard::addMenuHotspot(uint16 blstId, const Common::Rect &position, uint16 index,
@@ -1266,10 +1270,10 @@ void RivenHotspot::loadFromStream(Common::ReadStream *stream) {
 	_blstID = stream->readUint16BE();
 	_nameResource = stream->readSint16BE();
 
-	int16 left = stream->readSint16BE();
-	int16 top = stream->readSint16BE();
-	int16 right = stream->readSint16BE();
-	int16 bottom = stream->readSint16BE();
+	int16 left = stream->readSint16BE() * Riven_Scale;
+	int16 top = stream->readSint16BE() * Riven_Scale;
+	int16 right = stream->readSint16BE() * Riven_Scale;
+	int16 bottom = stream->readSint16BE() * Riven_Scale;
 
 	// Riven has some invalid rects, disable them here
 	// Known weird hotspots:

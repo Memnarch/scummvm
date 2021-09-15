@@ -500,7 +500,7 @@ void RivenSimpleCommand::setupOpcodes() {
 // Command 1: draw tBMP resource (tbmp_id, left, top, right, bottom, u0, u1, u2, u3)
 void RivenSimpleCommand::drawBitmap(uint16 op, const ArgumentArray &args) {
 	if (args.size() < 5) // Copy the image to the whole screen, ignoring the rest of the parameters
-		_vm->_gfx->copyImageToScreen(args[0], 0, 0, 608, 392);
+		_vm->_gfx->copyImageToScreen(args[0], 0, 0, Riven_MainWidth, Riven_MainHeight);
 	else          // Copy the image to a certain part of the screen
 		_vm->_gfx->copyImageToScreen(args[0], args[1], args[2], args[3], args[4]);
 }

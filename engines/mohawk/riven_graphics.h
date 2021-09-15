@@ -23,6 +23,7 @@
 #ifndef MOHAWK_RIVEN_GRAPHICS_H
 #define MOHAWK_RIVEN_GRAPHICS_H
 
+#include "mohawk/resource.h"
 #include "mohawk/graphics.h"
 #include "mohawk/riven_graphics_detection_enums.h"
 
@@ -93,7 +94,7 @@ public:
 	void updateEffects();
 
 	// Transitions
-	void scheduleTransition(RivenTransition id, const Common::Rect &rect = Common::Rect(0, 0, 608, 392));
+	void scheduleTransition(RivenTransition id, const Common::Rect &rect = Common::Rect(0, 0, Riven_MainWidth, Riven_MainHeight));
 	void runScheduledTransition();
 	void fadeToBlack();
 	void setTransitionMode(RivenTransitionMode mode);
