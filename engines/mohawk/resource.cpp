@@ -51,7 +51,10 @@ bool Archive::openFile(const Common::String &fileName) {
 		close();
 		return false;
 	}
-
+	ArchiveName = fileName;
+	ArchiveName.replace(ArchiveName.size() - 4, 1, "-");
+	SearchMan.addDirectory(ArchiveName, "./" + ArchiveName + "/", 100, 2);
+	warning("added directory");
 	return true;
 }
 
@@ -91,6 +94,23 @@ Common::SeekableReadStream *Archive::getResource(uint32 tag, uint16 id) {
 
 	const Resource &res = resMap[id];
 
+	Common::String ResName = getName(tag, id);
+	Common::String FileName = ArchiveName + Common::String::format("/%d/%d", tag, id);
+	Common::String FileWithName = ArchiveName + Common::String::format("/%s",ResName.c_str());
+
+	Common::File *file = new Common::File();
+	
+	warning(Common::String::format("Loading: %s", FileName.c_str()).c_str());
+	warning(Common::String::format("Name: %s", FileWithName.c_str()).c_str());
+	if (ResName != "")
+	if (file->open(FileWithName) || file->open(ResName))
+	{
+		return file;
+	}
+	else
+	{
+		delete file;
+	}
 	return new Common::SeekableSubReadStream(_stream, res.offset, res.offset + res.size);
 }
 
