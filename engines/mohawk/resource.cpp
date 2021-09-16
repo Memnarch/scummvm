@@ -26,6 +26,7 @@
 #include "common/substream.h"
 #include "common/util.h"
 #include "common/textconsole.h"
+#include "common/unzip.h"
 
 namespace Mohawk {
 
@@ -54,7 +55,11 @@ bool Archive::openFile(const Common::String &fileName) {
 	ArchiveName = fileName;
 	ArchiveName.replace(ArchiveName.size() - 4, 1, "-");
 	SearchMan.addDirectory(ArchiveName, "./" + ArchiveName + "/", 100, 2);
-	warning("added directory");
+
+	Common::Archive *zip = Common::makeZipArchive(ArchiveName + ".zip");
+
+	if (zip)
+		SearchMan.add(ArchiveName + "zip", zip, 99);
 	return true;
 }
 
