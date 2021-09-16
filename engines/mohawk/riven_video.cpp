@@ -197,15 +197,41 @@ void RivenVideo::drawNextFrame() {
 		convertedFrame = frame->convertTo(pixelFormat, _video->getPalette());
 		frame = convertedFrame;
 	}
-
-	g_system->copyRectToScreen(frame->getPixels(), frame->pitch,
-	                               _x, _y, _video->getWidth(), _video->getHeight());
+	g_system->copyRectToScreen(ScaleFrame(frame->getPixels(), frame->pitch, _video->getHeight(), pixelFormat.bytesPerPixel), frame->pitch * Riven_Scale,
+	                               _x * Riven_Scale, _y * Riven_Scale, _video->getWidth() * Riven_Scale, _video->getHeight() * Riven_Scale);
 
 	// Delete 8bpp conversion surface
 	if (convertedFrame) {
 		convertedFrame->free();
 		delete convertedFrame;
 	}
+}
+
+void *RivenVideo::ScaleFrame(const void *Pixels, int Pitch, int Height, int BytesPerPixel) {
+
+	ScaledPixel.clear();
+	byte *LPixels = (byte *)Pixels;
+	byte *LPixelsk = LPixels;
+	byte *LPixel;
+	for (int i = 0; i < Height; i++) {
+		for (int n = 0; n < Riven_Scale; n++) {
+			byte *LPixelsk = LPixels;
+			for (int k = 0; k < (Pitch / BytesPerPixel); k++) {
+				for (int m = 0; m < Riven_Scale; m++) {
+					LPixel = LPixelsk;
+					for (int bpp = 0; bpp < BytesPerPixel; bpp++) {
+						byte LByte = *LPixel;
+						ScaledPixel.push_back(LByte);
+						LPixel++;
+					}
+				}
+				LPixelsk += BytesPerPixel;
+			}
+		}
+		LPixels += Pitch;
+	}
+	
+	return ScaledPixel.data();
 }
 
 bool RivenVideo::needsUpdate() const {

@@ -25,6 +25,7 @@
 
 #include "common/list.h"
 #include "common/noncopyable.h"
+#include "common/array.h";
 
 namespace Video {
 class QuickTimeDecoder;
@@ -113,6 +114,9 @@ public:
 
 	/** Draw the next frame to the system screen */
 	void drawNextFrame();
+
+	void *ScaleFrame(const void *Pixels, int Pitch, int Height, int BytesPerPixel);
+
 private:
 	// Non-changing variables
 	MohawkEngine_Riven *_vm;
@@ -126,6 +130,8 @@ private:
 	bool _loop;
 	bool _enabled;
 	bool _playing;
+	//scaling buffers
+	Common::Array<byte> ScaledPixel;
 };
 
 class RivenVideoManager {
