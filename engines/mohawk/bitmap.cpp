@@ -30,6 +30,7 @@
 #include "common/system.h"
 #include "common/textconsole.h"
 #include "image/bmp.h"
+#include "image/png.h"
 
 namespace Mohawk {
 
@@ -40,7 +41,8 @@ MohawkBitmap::MohawkBitmap() {
 	static const PackFunction packTable[] = {
 		{ kPackNone, "Raw", &MohawkBitmap::unpackRaw },
 		{ kPackLZ, "LZ", &MohawkBitmap::unpackLZ },
-		{ kPackRiven, "Riven", &MohawkBitmap::unpackRiven }
+		{ kPackRiven, "Riven", &MohawkBitmap::unpackRiven },
+		{ kPackPNG, "PNG", &MohawkBitmap::unpackPNG}
 	};
 
 	_packTable = packTable;
@@ -361,6 +363,27 @@ void MohawkBitmap::unpackRiven() {
 
 	delete _data;
 	_data = new Common::MemoryReadStream(uncompressedData, _header.bytesPerRow * _header.height, DisposeAfterUse::YES);
+}
+
+void MohawkBitmap::unpackPNG() {
+
+	Image::PNGDecoder *png = new Image::PNGDecoder();
+	png->setSkipSignature(true);
+	png->loadStream(*_data);
+	delete _data;
+
+	int size = _header.bytesPerRow * _header.height;
+	byte *pixelData = (byte *)malloc(size);
+	if(png->getSurface()->format.bytesPerPixel == 3) {
+		memcpy(pixelData, png->getSurface()->getPixels(), size);	
+	} else {
+		Graphics::Surface *surface = png->getSurface()->convertTo(Graphics::PixelFormat(3, 8, 8, 8, 0, 16, 8, 0, 0));
+		memcpy(pixelData, surface->getPixels(), size);
+		surface->free();
+		delete surface;
+	}
+	delete png;
+	_data = new Common::MemoryReadStream(pixelData, size, DisposeAfterUse::YES);
 }
 
 static byte getLastTwoBits(byte c) {
