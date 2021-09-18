@@ -24,6 +24,7 @@
 
 #include "common/system.h"
 #include "common/stack.h"
+#include "graphics/pixelformat.h"
 
 namespace Common {
 DECLARE_SINGLETON(Graphics::CursorManager);
@@ -148,8 +149,9 @@ void CursorManager::replaceCursor(const void *buf, uint w, uint h, int hotspotX,
 }
 
 void CursorManager::replaceCursor(const Graphics::Cursor *cursor) {
+
 	replaceCursor(cursor->getSurface(), cursor->getWidth(), cursor->getHeight(), cursor->getHotspotX(),
-	              cursor->getHotspotY(), cursor->getKeyColor());
+	              cursor->getHotspotY(), cursor->getKeyColor(), false, cursor->getPixelFormat());
 
 	if (cursor->getPalette())
 		replaceCursorPalette(cursor->getPalette(), cursor->getPaletteStartIndex(), cursor->getPaletteCount());

@@ -25,6 +25,7 @@
 #include "common/textconsole.h"
 
 #include "graphics/wincursor.h"
+#include "graphics/pixelformat.h"
 
 namespace Graphics {
 
@@ -48,6 +49,14 @@ public:
 	const byte *getSurface() const { return _surface; }
 
 	const byte *getPalette() const { return _palette; }
+	const Graphics::PixelFormat* getPixelFormat() const {
+		if (_bitsPerPixel >= 24) {
+			const Graphics::PixelFormat *pFormat = &_format;
+			return pFormat;
+		}
+		else
+			return nullptr;
+	}
 	byte getPaletteStartIndex() const { return 0; }
 	uint16 getPaletteCount() const { return 256; }
 
@@ -63,6 +72,8 @@ private:
 	uint16 _hotspotX; ///< The cursor's hotspot's x coordinate.
 	uint16 _hotspotY; ///< The cursor's hotspot's y coordinate.
 	byte   _keyColor; ///< The cursor's transparent key
+	byte _bitsPerPixel;
+	Graphics::PixelFormat _format;
 
 	/** Clear the cursor. */
 	void clear();
@@ -127,9 +138,11 @@ bool WinCursor::readFromStream(Common::SeekableReadStream &stream) {
 	if (stream.readUint16LE() != 1)
 		return false;
 
-	// Only 1bpp, 4bpp and 8bpp supported
+	// Only 1bpp, 4bpp, 8bpp, 24bpp, 32bpp supported
 	uint16 bitsPerPixel = stream.readUint16LE();
-	if (bitsPerPixel != 1 && bitsPerPixel != 4 && bitsPerPixel != 8)
+	uint16 bytesPerPixel = MAX(1, bitsPerPixel / 8);
+	_bitsPerPixel = bitsPerPixel;
+	if (bitsPerPixel != 1 && bitsPerPixel != 4 && bitsPerPixel != 8 && bitsPerPixel != 24 && bitsPerPixel !=32)
 		return false;
 
 	// Compression
@@ -142,7 +155,7 @@ bool WinCursor::readFromStream(Common::SeekableReadStream &stream) {
 	uint32 numColors = stream.readUint32LE();
 
 	// If the color count is 0, then it uses up the maximum amount
-	if (numColors == 0)
+	if (numColors == 0 && bitsPerPixel < 24)
 		numColors = 1 << bitsPerPixel;
 
 	// Reading the palette
@@ -158,12 +171,20 @@ bool WinCursor::readFromStream(Common::SeekableReadStream &stream) {
 	uint32 dataSize = stream.size() - stream.pos();
 	byte *initialSource = new byte[dataSize];
 	stream.read(initialSource, dataSize);
+	if (bitsPerPixel >= 24) {
+		if (bitsPerPixel == 32)
+			_format = Graphics::PixelFormat(4, 8, 8, 8, 8, 16, 8, 0, 24);
+		else if (bitsPerPixel == 24)
+			_format = Graphics::PixelFormat(3, 8, 8, 8, 0, 16, 8, 0, 0);
+		
+	}
 
-	// Parse the XOR map
+
+		// Parse the XOR map
 	const byte *src = initialSource;
-	_surface = new byte[_width * _height];
-	byte *dest = _surface + _width * (_height - 1);
 	uint32 imagePitch = _width * bitsPerPixel / 8;
+	_surface = new byte[_width * _height * bytesPerPixel];
+	byte *dest = _surface + (_width * bytesPerPixel) * (_height - 1);
 
 	for (uint32 i = 0; i < _height; i++) {
 		byte *rowDest = dest;
@@ -189,46 +210,49 @@ bool WinCursor::readFromStream(Common::SeekableReadStream &stream) {
 			}
 		} else {
 			// 8bpp
-			memcpy(rowDest, src, _width);
+			memcpy(rowDest, src, imagePitch);
 		}
 
-		dest -= _width;
+		dest -= _width * bytesPerPixel;
 		src += imagePitch;
 	}
 
-	// Calculate our key color
-	if (numColors < 256) {
-		// If we're not using the maximum colors in a byte, we can fit it in
-		_keyColor = numColors;
-	} else {
-		// HACK: Try to find a color that's not being used so it can become
-		// our keycolor. It's quite impossible to fit 257 entries into 256...
-		for (uint32 i = 0; i < 256; i++) {
-			for (int j = 0; j < _width * _height; j++) {
-				// TODO: Also check to see if the space is transparent
+	if (bitsPerPixel < 24) {
 
-				if (_surface[j] == i)
-					break;
+		// Calculate our key color
+		if (numColors < 256) {
+			// If we're not using the maximum colors in a byte, we can fit it in
+			_keyColor = numColors;
+		} else {
+			// HACK: Try to find a color that's not being used so it can become
+			// our keycolor. It's quite impossible to fit 257 entries into 256...
+			for (uint32 i = 0; i < 256; i++) {
+				for (int j = 0; j < _width * _height; j++) {
+					// TODO: Also check to see if the space is transparent
 
-				if (j == _width * _height - 1) {
-					_keyColor = i;
-					i = 256;
-					break;
+					if (_surface[j] == i)
+						break;
+
+					if (j == _width * _height - 1) {
+						_keyColor = i;
+						i = 256;
+						break;
+					}
 				}
 			}
 		}
-	}
 
-	// Now go through and apply the AND map to get the transparency
-	uint32 andWidth = (_width + 7) / 8;
-	src += andWidth * (_height - 1);
+		// Now go through and apply the AND map to get the transparency
+		uint32 andWidth = (_width + 7) / 8;
+		src += andWidth * (_height - 1);
 
-	for (uint32 y = 0; y < _height; y++) {
-		for (uint32 x = 0; x < _width; x++)
-			if (src[x / 8] & (1 << (7 - x % 8)))
-				_surface[y * _width + x] = _keyColor;
+		for (uint32 y = 0; y < _height; y++) {
+			for (uint32 x = 0; x < _width; x++)
+				if (src[x / 8] & (1 << (7 - x % 8)))
+					_surface[y * _width + x] = _keyColor;
 
-		src -= andWidth;
+			src -= andWidth;
+		}
 	}
 
 	delete[] initialSource;

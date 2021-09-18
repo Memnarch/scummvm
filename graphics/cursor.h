@@ -24,6 +24,7 @@
 #define GRAPHICS_CURSOR_H
 
 #include "common/scummsys.h"
+#include "graphics/pixelformat.h"
 
 namespace Graphics {
 
@@ -65,6 +66,8 @@ public:
 	virtual byte getPaletteStartIndex() const = 0;
 	/** Return the number of colors in the palette. */
 	virtual uint16 getPaletteCount() const = 0;
+
+	virtual const Graphics::PixelFormat* getPixelFormat() const { return nullptr; };
 };
 /** @} */
 } // End of namespace Graphics
