@@ -137,7 +137,9 @@ Common::Error MohawkEngine_Riven::run() {
 	_rnd = new Common::RandomSource("riven");
 
 	// Create the cursor manager
-	if (Common::File::exists("rivendmo.exe"))
+	if (Common::File::exists("RivenCursors.dll"))
+		_cursor = new PECursorManager("RivenCursors.dll");
+	else if (Common::File::exists("rivendmo.exe"))
 		_cursor = new PECursorManager("rivendmo.exe");
 	else if (Common::File::exists("riven.exe"))
 		_cursor = new PECursorManager("riven.exe");
