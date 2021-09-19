@@ -270,9 +270,8 @@ public:
 	}
 
 	bool drawFrame(uint32 elapsed) override {
-		assert(_mainScreen->format.bytesPerPixel == 2);
-		assert(_effectScreen->format.bytesPerPixel == 2);
-
+		assert(_mainScreen->format.bytesPerPixel == 4);
+		assert(_effectScreen->format.bytesPerPixel == 4);
 		if (elapsed == _duration) {
 			_effectScreen->copyRectToSurface(*_mainScreen, 0, 0, Common::Rect(_mainScreen->w, _mainScreen->h));
 			_system->copyRectToScreen(_effectScreen->getBasePtr(0, 0), _effectScreen->pitch, 0, 0, _effectScreen->w, _effectScreen->h);
@@ -282,9 +281,9 @@ public:
 
 			uint alpha = elapsed * 255 / _duration;
 			for (int y = 0; y < _mainScreen->h; y++) {
-				uint16 *src1 = (uint16 *) _mainScreen->getBasePtr(0, y);
-				uint16 *src2 = (uint16 *) _effectScreen->getBasePtr(0, y);
-				uint16 *dst = (uint16 *) screen->getBasePtr(0, y);
+				uint32 *src1 = (uint32 *) _mainScreen->getBasePtr(0, y);
+				uint32 *src2 = (uint32 *) _effectScreen->getBasePtr(0, y);
+				uint32 *dst = (uint32 *) screen->getBasePtr(0, y);
 				for (int x = 0; x < _mainScreen->w; x++) {
 					uint8 r1, g1, b1, r2, g2, b2;
 					_mainScreen->format.colorToRGB(*src1++, r1, g1, b1);
@@ -298,7 +297,7 @@ public:
 					g /= 255;
 					b /= 255;
 
-					*dst++ = (uint16) screen->format.RGBToColor(r, g, b);
+					*dst++ = (uint32) screen->format.RGBToColor(r, g, b);
 				}
 			}
 
@@ -328,7 +327,11 @@ RivenGraphics::RivenGraphics(MohawkEngine_Riven* vm) :
 	_bitmapDecoder = new MohawkBitmap();
 
 	// Restrict ourselves to a single pixel format to simplify the effects implementation
-	_pixelFormat = Graphics::PixelFormat(2, 5, 6, 5, 0, 11, 5, 0, 0);
+	_pixelFormat = Graphics::PixelFormat(4, 0, 0, 0, 0, 0, 8, 16, 24);
+	_pixelFormat.aLoss = 0;
+	_pixelFormat.rLoss = 0;
+	_pixelFormat.gLoss = 0;
+	_pixelFormat.bLoss = 0;
 	initGraphics(Riven_ScreenWidth, Riven_ScreenHeight, &_pixelFormat);
 
 	// The actual game graphics only take up the first 392 rows. The inventory
