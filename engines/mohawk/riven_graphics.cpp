@@ -428,10 +428,10 @@ WaterEffect::WaterEffect(MohawkEngine_Riven *vm, uint16 sfxeID) :
 	// Read in header info
 	uint16 frameCount = sfxeStream->readUint16BE();
 	uint32 offsetTablePosition = sfxeStream->readUint32BE();
-	_rect.left = sfxeStream->readUint16BE();
-	_rect.top = sfxeStream->readUint16BE();
-	_rect.right = sfxeStream->readUint16BE();
-	_rect.bottom = sfxeStream->readUint16BE();
+	_rect.left = sfxeStream->readUint16BE() * Riven_Scale;
+	_rect.top = sfxeStream->readUint16BE() * Riven_Scale;
+	_rect.right = sfxeStream->readUint16BE() * Riven_Scale;
+	_rect.bottom = sfxeStream->readUint16BE() * Riven_Scale;
 	_speed = sfxeStream->readUint16BE();
 	// Skip the rest of the fields...
 
@@ -475,10 +475,10 @@ void WaterEffect::update() {
 		if (op == 1) {        // Increment Row
 			curRow++;
 		} else if (op == 3) { // Copy Pixels
-			uint16 dstLeft = script->readUint16BE();
-			uint16 srcLeft = script->readUint16BE();
-			uint16 srcTop = script->readUint16BE();
-			uint16 rowWidth = script->readUint16BE();
+			uint16 dstLeft = script->readUint16BE() * Riven_Scale;
+			uint16 srcLeft = script->readUint16BE() * Riven_Scale;
+			uint16 srcTop = script->readUint16BE() * Riven_Scale;
+			uint16 rowWidth = script->readUint16BE() * Riven_Scale;
 
 			byte *src = (byte *)mainScreen->getBasePtr(srcLeft, srcTop);
 			byte *dst = (byte *)screen->getBasePtr(dstLeft, curRow + _rect.top);

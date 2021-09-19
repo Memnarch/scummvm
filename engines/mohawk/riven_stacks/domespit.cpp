@@ -129,8 +129,8 @@ int16 DomeSpit::getSliderSlotClosestToPos(uint16 startHotspot, const Common::Poi
 	// the slider area vertically. This and the y mouse position being directly put into
 	// the slider area allows the user to move the cursor out of the slider area and still
 	// be able to move the slider.
-	int16 minXHotspot = 211; // suitable min x value hotspot for all domes
-	int16 maxXHotspot = 407; // suitable max x value hotspot for all domes
+	int16 minXHotspot = 211 * Riven_Scale; // suitable min x value hotspot for all domes
+	int16 maxXHotspot = 407 * Riven_Scale; // suitable max x value hotspot for all domes
 
 	// Find the slider slot closest to pos. This is not necessarily the slider being moved.
 	for (uint16 i = 0; i < kDomeSliderSlotCount; i++) {
@@ -199,7 +199,7 @@ void DomeSpit::dragDomeSlider(uint16 startHotspot) {
 }
 
 void DomeSpit::drawDomeSliders(uint16 startHotspot) {
-	Common::Rect dstAreaRect = Common::Rect(200, 250, 420, 319);
+	Common::Rect dstAreaRect = Common::Rect(200 * Riven_Scale, 250 * Riven_Scale, 420 * Riven_Scale, 319 * Riven_Scale);
 
 	// On pspit, the rect is different by two pixels
 	// (alternatively, we could just use hotspot 3 here, but only on pspit is there a hotspot for this)
