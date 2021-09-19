@@ -47,6 +47,7 @@ RivenVideo::RivenVideo(MohawkEngine_Riven *vm, uint16 code) :
 		_enabled(false),
 		_video(nullptr),
 		_playing(false) {
+	Scaler = &ScalerMan.findScalerPlugin("normal")->get<ScalerPluginObject>();
 }
 
 RivenVideo::~RivenVideo() {
@@ -65,6 +66,8 @@ void RivenVideo::load(uint16 id) {
 	_video->setSoundType(Audio::Mixer::kSFXSoundType);
 	_video->setChunkBeginOffset(_vm->getResourceOffset(ID_TMOV, id));
 	_video->loadStream(_vm->getResource(ID_TMOV, id));
+	if (Scaler)
+		Scaler->initialize(_video->getPixelFormat());
 }
 
 void RivenVideo::close() {
@@ -209,7 +212,45 @@ void RivenVideo::drawNextFrame() {
 
 void *RivenVideo::ScaleFrame(const void *Pixels, int Pitch, int Height, int BytesPerPixel) {
 
-	ScaledPixel.clear();
+	int Size = Height * Pitch * Riven_Scale * Riven_Scale;
+	int srcPitch = Pitch;
+	int srcWidth = Pitch / BytesPerPixel;
+	int srcHeight = Height;
+	BufferA.reserve(Size);
+	BufferB.reserve(Size);
+	if (Scaler) {
+		if (Scaler->hasFactor(Riven_Scale)) {
+			Scaler->setFactor(Riven_Scale);
+			Scaler->scale((const uint8*)Pixels, Pitch, BufferA.data(), Pitch * Riven_Scale, srcWidth, srcHeight, 0, 0);
+			return BufferA.data();
+		} else if ((Riven_Scale % 2 == 0) && (Scaler->hasFactor(2))) {
+			Scaler->setFactor(2);
+			Scaler->scale((const uint8 *)Pixels, srcPitch, BufferA.data(), srcPitch * 2, srcWidth, srcHeight, 0, 0);
+			srcPitch *= 2;
+			srcWidth *= 2;
+			srcHeight *= 2;
+			uint8 *src = BufferA.data();
+			uint8 *dest = BufferB.data();
+			for (int i = 1; i < Riven_Scale / 2; i++) {
+				
+				Scaler->scale(src, srcPitch, dest, srcPitch * 2, srcWidth, srcHeight, 0, 0);
+				srcPitch *= 2;
+				srcWidth *= 2;
+				srcHeight *= 2;
+				if (i % 2 == 1) {
+					src = BufferB.data();
+					dest = BufferA.data();
+				} else {
+					src = BufferA.data();
+					dest = BufferB.data();
+				}
+			}
+			return src;
+		}
+	}
+
+	//fallback to simpel repeat scaling
+	byte *buffer = BufferA.data();
 	byte *LPixels = (byte *)Pixels;
 	byte *LPixelsk = LPixels;
 	byte *LPixel;
@@ -221,7 +262,8 @@ void *RivenVideo::ScaleFrame(const void *Pixels, int Pitch, int Height, int Byte
 					LPixel = LPixelsk;
 					for (int bpp = 0; bpp < BytesPerPixel; bpp++) {
 						byte LByte = *LPixel;
-						ScaledPixel.push_back(LByte);
+						*buffer = LByte;
+						buffer++;
 						LPixel++;
 					}
 				}
@@ -230,8 +272,9 @@ void *RivenVideo::ScaleFrame(const void *Pixels, int Pitch, int Height, int Byte
 		}
 		LPixels += Pitch;
 	}
-	
-	return ScaledPixel.data();
+
+	return BufferA.data();
+
 }
 
 bool RivenVideo::needsUpdate() const {

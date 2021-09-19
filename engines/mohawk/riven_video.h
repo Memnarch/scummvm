@@ -26,6 +26,7 @@
 #include "common/list.h"
 #include "common/noncopyable.h"
 #include "common/array.h";
+#include "graphics/scalerplugin.h"
 
 namespace Video {
 class QuickTimeDecoder;
@@ -131,7 +132,9 @@ private:
 	bool _enabled;
 	bool _playing;
 	//scaling buffers
-	Common::Array<byte> ScaledPixel;
+	Common::Array<byte> BufferA;
+	Common::Array<byte> BufferB;
+	ScalerPluginObject *Scaler;
 };
 
 class RivenVideoManager {
