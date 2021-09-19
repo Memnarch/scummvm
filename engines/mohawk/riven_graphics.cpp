@@ -828,6 +828,7 @@ void RivenGraphics::loadMenuFont() {
 	} else {
 		fontHeight = 11;
 	}
+	fontHeight *= Riven_Scale;
 
 	Common::SeekableReadStream *stream = SearchMan.createReadStreamForMember(fontName);
 	if (stream) {
