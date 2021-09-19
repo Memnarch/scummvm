@@ -711,10 +711,10 @@ void RivenCard::loadCardPictureList(uint16 id) {
 		Picture &picture = _pictureList[i];
 		picture.index = plst->readUint16BE();
 		picture.id = plst->readUint16BE();
-		picture.rect.left = plst->readUint16BE();
-		picture.rect.top = plst->readUint16BE();
-		picture.rect.right = plst->readUint16BE();
-		picture.rect.bottom = plst->readUint16BE();
+		picture.rect.left = plst->readUint16BE() * Riven_Scale;
+		picture.rect.top = plst->readUint16BE() * Riven_Scale;
+		picture.rect.right = plst->readUint16BE() * Riven_Scale;
+		picture.rect.bottom = plst->readUint16BE() * Riven_Scale;
 	}
 
 	delete plst;
