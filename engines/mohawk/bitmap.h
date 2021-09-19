@@ -29,6 +29,7 @@
 #include "common/stream.h"
 #include "common/array.h"
 #include "graphics/surface.h"
+#include "image/png.h"
 
 namespace Mohawk {
 
@@ -132,6 +133,7 @@ private:
 	int _packTableSize;
 	const DrawFunction *_drawTable;
 	int _drawTableSize;
+	Image::PNGDecoder* png;
 
 	// Unpack/Draw helpers
 	const char *getPackName();
