@@ -377,7 +377,7 @@ void MohawkBitmap::unpackPNG() {
 	if(png->getSurface()->format.bytesPerPixel == 3) {
 		memcpy(pixelData, png->getSurface()->getPixels(), size);	
 	} else {
-		Graphics::Surface *surface = png->getSurface()->convertTo(Graphics::PixelFormat(3, 8, 8, 8, 0, 16, 8, 0, 0));
+		Graphics::Surface *surface = png->getSurface()->convertTo(Graphics::PixelFormat(3, 8, 8, 8, 0, 16, 8, 0, 0), png->getPalette());
 		memcpy(pixelData, surface->getPixels(), size);
 		surface->free();
 		delete surface;
