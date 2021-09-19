@@ -1134,8 +1134,8 @@ void RivenCard::loadCardMovieList(uint16 id) {
 		mlstRecord.index = mlstStream->readUint16BE();
 		mlstRecord.movieID = mlstStream->readUint16BE();
 		mlstRecord.playbackSlot = mlstStream->readUint16BE();
-		mlstRecord.left = mlstStream->readUint16BE();
-		mlstRecord.top = mlstStream->readUint16BE();
+		mlstRecord.left = mlstStream->readUint16BE() * Riven_Scale;
+		mlstRecord.top = mlstStream->readUint16BE() * Riven_Scale;
 		mlstRecord.lowBoundTime = mlstStream->readUint16BE();
 		mlstRecord.startTime = mlstStream->readUint16BE();
 		mlstRecord.highBoundTime = mlstStream->readUint16BE();
