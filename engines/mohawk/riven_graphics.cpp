@@ -327,11 +327,7 @@ RivenGraphics::RivenGraphics(MohawkEngine_Riven* vm) :
 	_bitmapDecoder = new MohawkBitmap();
 
 	// Restrict ourselves to a single pixel format to simplify the effects implementation
-	_pixelFormat = Graphics::PixelFormat(4, 0, 0, 0, 0, 0, 8, 16, 24);
-	_pixelFormat.aLoss = 0;
-	_pixelFormat.rLoss = 0;
-	_pixelFormat.gLoss = 0;
-	_pixelFormat.bLoss = 0;
+	_pixelFormat = Graphics::PixelFormat(4, 8, 8, 8, 8, 0, 8, 16, 24);
 	initGraphics(Riven_ScreenWidth, Riven_ScreenHeight, &_pixelFormat);
 
 	// The actual game graphics only take up the first 392 rows. The inventory
