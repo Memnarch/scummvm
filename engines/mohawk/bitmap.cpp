@@ -590,7 +590,14 @@ void MohawkBitmap::drawRaw(Graphics::Surface *surface) {
 	assert(surface);
 
 	if (png) {
-		surface->copyFrom(*png->getSurface());
+		if (surface->format == png->getSurface()->format) {
+			surface->copyFrom(*png->getSurface());
+		} else {
+			Graphics::Surface *newSurface = png->getSurface()->convertTo(surface->format, png->getPalette());
+			surface->copyFrom(*newSurface);
+			newSurface->free();
+			delete newSurface;
+		}
 	} else {
 		for (uint16 y = 0; y < _header.height; y++) {
 			if (getBitsPerPixel() == 24) {
