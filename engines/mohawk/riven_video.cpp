@@ -200,8 +200,9 @@ void RivenVideo::drawNextFrame() {
 		convertedFrame = frame->convertTo(pixelFormat, _video->getPalette());
 		frame = convertedFrame;
 	}
+	//_x and _y are scaled when loaded from stream, so don't scale twice
 	g_system->copyRectToScreen(ScaleFrame(frame->getPixels(), frame->pitch, _video->getHeight(), pixelFormat.bytesPerPixel), frame->pitch * Riven_Scale,
-	                               _x * Riven_Scale, _y * Riven_Scale, _video->getWidth() * Riven_Scale, _video->getHeight() * Riven_Scale);
+	                               _x, _y, _video->getWidth() * Riven_Scale, _video->getHeight() * Riven_Scale);
 
 	// Delete 8bpp conversion surface
 	if (convertedFrame) {
