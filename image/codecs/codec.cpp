@@ -44,6 +44,7 @@
 #include "image/codecs/svq1.h"
 #include "image/codecs/truemotion1.h"
 #include "image/codecs/xan.h"
+#include "image/codecs/WMF.h"
 
 #include "common/endian.h"
 #include "common/textconsole.h"
@@ -280,7 +281,8 @@ Codec *createQuickTimeCodec(uint32 tag, int width, int height, int bitsPerPixel)
 		// Used my L-Zone-mac (Director game)
 		return new BitmapRawDecoder(width, height, bitsPerPixel, true);
 	default:
-		warning("Unsupported QuickTime codec \'%s\'", tag2str(tag));
+		warning("Unsupported QuickTime codec, fallback to WMF \'%s\'", tag2str(tag));
+		return new WMFDecoder(width, height);
 	}
 
 	return 0;

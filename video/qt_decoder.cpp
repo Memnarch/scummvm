@@ -659,10 +659,14 @@ Common::SeekableReadStream *QuickTimeDecoder::VideoTrackHandler::getNextFramePac
 	// Finally, read in the raw data for the frame
 	//debug("Frame Data[%d]: Offset = %d, Size = %d", _curFrame, stream->pos(), _parent->sampleSizes[_curFrame]);
 
-	if (_parent->sampleSize != 0)
-		return stream->readStream(_parent->sampleSize);
+	if (stream->size() > stream->pos()) {
 
-	return stream->readStream(_parent->sampleSizes[_curFrame]);
+		if (_parent->sampleSize != 0)
+			return stream->readStream(_parent->sampleSize);
+		if (_parent->sampleSizes[_curFrame] != 0)
+			return stream->readStream(_parent->sampleSizes[_curFrame]);
+	}
+	return nullptr;
 }
 
 uint32 QuickTimeDecoder::VideoTrackHandler::getFrameDuration() {
@@ -745,23 +749,27 @@ const Graphics::Surface *QuickTimeDecoder::VideoTrackHandler::bufferNextFrame() 
 
 	// Get the next packet
 	uint32 descId;
-	Common::SeekableReadStream *frameData = getNextFramePacket(descId);
+	Common::SeekableReadStream *frameData = nullptr;
+	Common::SeekableReadStream *PacketData = getNextFramePacket(descId);
 
-	if (!frameData || !descId || descId > _parent->sampleDescs.size()) {
-		delete frameData;
-		return 0;
+	if (!PacketData || !descId || descId > _parent->sampleDescs.size()) {
+		delete PacketData;
+		PacketData = nullptr;
+		frameData = _decoder->_fd;//just throw the entire file into the VideoCodec, WMF will need this
+	} else {
+		frameData = PacketData;
 	}
 
 	// Find which video description entry we want
 	VideoSampleDesc *entry = (VideoSampleDesc *)_parent->sampleDescs[descId - 1];
 
 	if (!entry->_videoCodec) {
-		delete frameData;
+		delete PacketData;
 		return 0;
 	}
 
 	const Graphics::Surface *frame = entry->_videoCodec->decodeFrame(*frameData);
-	delete frameData;
+	delete PacketData;
 
 	// Update the palette
 	if (entry->_videoCodec->containsPalette()) {

@@ -59,7 +59,7 @@ bool Archive::openFile(const Common::String &fileName) {
 	Common::Archive *zip = Common::makeZipArchive(ArchiveName + ".zip");
 
 	if (zip)
-		SearchMan.add(ArchiveName, zip, 99);
+		SearchMan.add(ArchiveName + "zip", zip, 99);
 	return true;
 }
 
@@ -99,7 +99,7 @@ Common::SeekableReadStream *Archive::getResource(uint32 tag, uint16 id) {
 
 	const Resource &res = resMap[id];
 
-	if (tag == ID_TBMP) {
+	if ((tag == ID_TBMP) || (tag == ID_TMOV)) {
 
 		Common::String ResName = getName(tag, id);
 		Common::String ResId = Common::String::format("%d", id);
