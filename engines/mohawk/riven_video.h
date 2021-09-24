@@ -116,8 +116,6 @@ public:
 	/** Draw the next frame to the system screen */
 	void drawNextFrame();
 
-	void *ScaleFrame(const void *Pixels, int Pitch, int Height, int BytesPerPixel);
-
 private:
 	// Non-changing variables
 	MohawkEngine_Riven *_vm;
@@ -131,10 +129,6 @@ private:
 	bool _loop;
 	bool _enabled;
 	bool _playing;
-	//scaling buffers
-	Common::Array<byte> BufferA;
-	Common::Array<byte> BufferB;
-	ScalerPluginObject *Scaler;
 };
 
 class RivenVideoManager {

@@ -48,9 +48,11 @@ namespace Video {
 // QuickTimeDecoder
 ////////////////////////////////////////////
 
-QuickTimeDecoder::QuickTimeDecoder() {
+QuickTimeDecoder::QuickTimeDecoder(int ScaleX, int ScaleY) {
 	_scaledSurface = 0;
 	_width = _height = 0;
+	_ScaleX = ScaleX;
+	_ScaleY = ScaleY;
 }
 
 QuickTimeDecoder::~QuickTimeDecoder() {
@@ -86,19 +88,18 @@ void QuickTimeDecoder::close() {
 
 const Graphics::Surface *QuickTimeDecoder::decodeNextFrame() {
 	const Graphics::Surface *frame = VideoDecoder::decodeNextFrame();
-
 	// Update audio buffers too
 	// (needs to be done after we find the next track)
 	updateAudioBuffer();
-
+	
 	// We have to initialize the scaled surface
-	if (frame && (_scaleFactorX != 1 || _scaleFactorY != 1)) {
+	if (frame && (_scaleFactorX != 1 || _scaleFactorY != 1 || !_hasHighResStream)) {
 		if (!_scaledSurface) {
 			_scaledSurface = new Graphics::Surface();
 			_scaledSurface->create(_width, _height, getPixelFormat());
 		}
 
-		scaleSurface(frame, _scaledSurface, _scaleFactorX, _scaleFactorY);
+		scaleSurface(frame, _scaledSurface, _scaleFactorX / _ScaleX, _scaleFactorY / _ScaleY);
 		return _scaledSurface;
 	}
 
@@ -220,13 +221,14 @@ void QuickTimeDecoder::init() {
 	const Common::Array<Common::QuickTimeParser::Track *> &tracks = Common::QuickTimeParser::_tracks;
 	for (uint32 i = 0; i < tracks.size(); i++) {
 		if (tracks[i]->codecType == CODEC_TYPE_VIDEO) {
-			for (uint32 j = 0; j < tracks[i]->sampleDescs.size(); j++)
+			for (uint32 j = 0; j < tracks[i]->sampleDescs.size(); j++) {
 				((VideoSampleDesc *)tracks[i]->sampleDescs[j])->initCodec();
+				_hasHighResStream = _hasHighResStream || ((VideoSampleDesc *)tracks[i]->sampleDescs[j])->_videoCodec->IsHighRes();
+			}
 
 			addTrack(new VideoTrackHandler(this, tracks[i]));
 		}
 	}
-
 	// Prepare the first video track
 	VideoTrackHandler *nextVideoTrack = (VideoTrackHandler *)findNextVideoTrack();
 
@@ -238,6 +240,11 @@ void QuickTimeDecoder::init() {
 		} else {
 			_width = nextVideoTrack->getWidth();
 			_height = nextVideoTrack->getHeight();
+		}
+
+		if (!_hasHighResStream) {
+			_width *= _ScaleX;
+			_height *= _ScaleY;
 		}
 	}
 }
@@ -251,10 +258,32 @@ void QuickTimeDecoder::updateAudioBuffer() {
 
 void QuickTimeDecoder::scaleSurface(const Graphics::Surface *src, Graphics::Surface *dst, const Common::Rational &scaleFactorX, const Common::Rational &scaleFactorY) {
 	assert(src && dst);
-
-	for (int32 j = 0; j < dst->h; j++)
-		for (int32 k = 0; k < dst->w; k++)
-			memcpy(dst->getBasePtr(k, j), src->getBasePtr((k * scaleFactorX).toInt() , (j * scaleFactorY).toInt()), src->format.bytesPerPixel);
+	//simpel repeat scaling
+	byte *buffer = (byte*)dst->getPixels();
+	byte *LPixels = (byte *)src->getPixels();
+	byte *LPixel;
+	int BytesPerPixel = src->format.bytesPerPixel;
+	int Pitch = src->pitch;
+	int ScaleX = 1.0/scaleFactorX.toDouble();
+	int ScaleY = 1.0 / scaleFactorY.toDouble();
+	for (int i = 0; i < src->h; i++) {
+		for (int n = 0; n < ScaleY; n++) {
+			byte *LPixelsk = LPixels;
+			for (int k = 0; k < (Pitch / BytesPerPixel); k++) {
+				for (int m = 0; m < ScaleX; m++) {
+					LPixel = LPixelsk;
+					for (int bpp = 0; bpp < BytesPerPixel; bpp++) {
+						byte LByte = *LPixel;
+						*buffer = LByte;
+						buffer++;
+						LPixel++;
+					}
+				}
+				LPixelsk += BytesPerPixel;
+			}
+		}
+		LPixels += Pitch;
+	}
 }
 
 QuickTimeDecoder::VideoSampleDesc::VideoSampleDesc(Common::QuickTimeParser::Track *parentTrack, uint32 codecTag) : Common::QuickTimeParser::SampleDesc(parentTrack, codecTag) {

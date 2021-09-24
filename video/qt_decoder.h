@@ -60,7 +60,7 @@ namespace Video {
  */
 class QuickTimeDecoder : public VideoDecoder, public Audio::QuickTimeAudioDecoder {
 public:
-	QuickTimeDecoder();
+	QuickTimeDecoder(int ScaleX = 1, int ScaleY = 1);
 	virtual ~QuickTimeDecoder();
 
 	bool loadFile(const Common::Path &filename);
@@ -80,6 +80,8 @@ private:
 	void updateAudioBuffer();
 
 	uint16 _width, _height;
+	uint16 _ScaleX, _ScaleY;
+	bool _hasHighResStream = false;
 
 	Graphics::Surface *_scaledSurface;
 	void scaleSurface(const Graphics::Surface *src, Graphics::Surface *dst,

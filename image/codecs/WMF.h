@@ -98,6 +98,7 @@ namespace Image {
 
 		Graphics::PixelFormat getPixelFormat() const { return Graphics::PixelFormat(4, 8, 8, 8, 0, 16, 8, 0, 0); };
 
+		bool IsHighRes() override { return true; }
 	private:
 		IMFSourceReader *_reader;
 		IMFByteStream *_byteStream;

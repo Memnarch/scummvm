@@ -111,6 +111,10 @@ public:
 	 */
 	virtual void setDither(DitherType type, const byte *palette) {}
 
+	//return if extra scaling for this codec is needed. Allows us to specify when we use a codec for prescaled videos or if it's a classic and needs scaling
+
+	virtual bool IsHighRes() { return false; }
+
 	/**
 	 * Create a dither table, as used by QuickTime codecs.
 	 */
