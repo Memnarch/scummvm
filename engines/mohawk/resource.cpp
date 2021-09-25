@@ -38,6 +38,8 @@ Archive::Archive() {
 
 Archive::~Archive() {
 	close();
+	if (zip)
+		delete zip;
 }
 
 bool Archive::openFile(const Common::String &fileName) {
@@ -56,10 +58,8 @@ bool Archive::openFile(const Common::String &fileName) {
 	ArchiveName.replace(ArchiveName.size() - 4, 1, "-");
 	SearchMan.addDirectory(ArchiveName, "./" + ArchiveName + "/", 100, 2);
 
-	Common::Archive *zip = Common::makeZipArchive(ArchiveName + ".zip");
+	zip = Common::makeZipArchive(ArchiveName + ".zip");
 
-	if (zip)
-		SearchMan.add(ArchiveName + "zip", zip, 99);
 	return true;
 }
 
@@ -108,11 +108,17 @@ Common::SeekableReadStream *Archive::getResource(uint32 tag, uint16 id) {
 
 		warning(Common::String::format("Loading ResId: %s", ResId.c_str()).c_str());
 		warning(Common::String::format("ResName: %s", ResName.c_str()).c_str());
-		if ((ResName != "" && file->open(ResName)) || file->open(ResId)) {
+		if ((ResName != "" && file->open(ResName)) || (ResName == "" && file->open(ResId))) {
 			return file;
-		} else {
-			delete file;
+		} 
+
+		if (zip) {
+			if ((ResName != "" && file->open(ResName, *zip)) || (ResName == "" && file->open(ResId, *zip))) {
+				return file;
+			} 
 		}
+
+		delete file;
 	}
 	return new Common::SeekableSubReadStream(_stream, res.offset, res.offset + res.size);
 }

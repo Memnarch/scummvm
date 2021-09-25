@@ -168,6 +168,7 @@ protected:
 	typedef Common::HashMap<uint32, ResourceMap> TypeMap;
 	TypeMap _types;
 	Common::String ArchiveName;
+	Common::Archive *zip = nullptr;
 };
 
 class MohawkArchive : public Archive {
