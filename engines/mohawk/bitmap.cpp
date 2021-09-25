@@ -65,6 +65,7 @@ MohawkBitmap::MohawkBitmap() {
 	_header.colorTable.rgbBits = 0;
 	_header.colorTable.tableSize = 0;
 	_data = nullptr;
+	png = nullptr;
 }
 
 MohawkBitmap::~MohawkBitmap() {
@@ -111,8 +112,10 @@ MohawkSurface *MohawkBitmap::decodeImage(Common::SeekableReadStream *stream) {
 	drawImage(surface);
 	if (_data)
 		delete _data;
-	if (png)
+	if (png) {
 		delete png;
+		png = nullptr;
+	}
 
 	return new MohawkSurface(surface, _header.colorTable.palette);
 }
