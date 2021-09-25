@@ -469,7 +469,7 @@ void WaterEffect::update() {
 	uint16 curRow = 0;
 	for (uint16 op = script->readUint16BE(); op != 4; op = script->readUint16BE()) {
 		if (op == 1) {        // Increment Row
-			curRow++;
+			curRow += Riven_Scale;
 		} else if (op == 3) { // Copy Pixels
 			uint16 dstLeft = script->readUint16BE() * Riven_Scale;
 			uint16 srcLeft = script->readUint16BE() * Riven_Scale;
@@ -479,7 +479,11 @@ void WaterEffect::update() {
 			byte *src = (byte *)mainScreen->getBasePtr(srcLeft, srcTop);
 			byte *dst = (byte *)screen->getBasePtr(dstLeft, curRow + _rect.top);
 
-			memcpy(dst, src, rowWidth * screen->format.bytesPerPixel);
+			for (int i = 0; i < Riven_Scale; i++) {
+				memcpy(dst, src, rowWidth * screen->format.bytesPerPixel);
+				dst += screen->pitch;
+				src += mainScreen->pitch;
+			}
 		} else if (op != 4) { // End of Script
 			error ("Unknown SFXE opcode %d", op);
 		}
