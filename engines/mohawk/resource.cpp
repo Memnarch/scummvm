@@ -102,6 +102,12 @@ Common::SeekableReadStream *Archive::getResource(uint32 tag, uint16 id) {
 	if ((tag == ID_TBMP) || (tag == ID_TMOV)) {
 
 		Common::String ResName = getName(tag, id);
+		int index = ResName.find('/', 0);
+		while (index > -1) 
+		{
+			ResName.replace((uint32)index, 1, "_");
+			index = ResName.find('/', index);
+		}
 		Common::String ResId = Common::String::format("%d", id);
 
 		Common::File *file = new Common::File();
