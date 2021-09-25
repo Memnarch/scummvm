@@ -123,7 +123,7 @@ namespace Mohawk {
 #define ID_BBOX MKTAG('B','B','O','X') // Boxes? (CSWorld, CSAmtrak)
 #define ID_SYSX MKTAG('S','Y','S','X') // MIDI Sysex
 
-const int Riven_Scale = 2;
+const int Riven_Scale = 4;
 const int Riven_ScreenWidth = 608 * Riven_Scale;
 const int Riven_ScreenHeight = 436 * Riven_Scale;
 const int Riven_MainWidth = Riven_ScreenWidth;
