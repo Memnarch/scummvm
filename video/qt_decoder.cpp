@@ -38,6 +38,7 @@
 #include "common/system.h"
 #include "common/textconsole.h"
 #include "common/util.h"
+#include "graphics/conversion.h"
 
 // Video codecs
 #include "image/codecs/codec.h"
@@ -98,8 +99,8 @@ const Graphics::Surface *QuickTimeDecoder::decodeNextFrame() {
 			_scaledSurface = new Graphics::Surface();
 			_scaledSurface->create(_width, _height, getPixelFormat());
 		}
+		scaleSurface(frame, _scaledSurface);
 
-		scaleSurface(frame, _scaledSurface, _scaleFactorX / _ScaleX, _scaleFactorY / _ScaleY);
 		return _scaledSurface;
 	}
 
@@ -256,34 +257,11 @@ void QuickTimeDecoder::updateAudioBuffer() {
 			((AudioTrackHandler *)*it)->updateBuffer();
 }
 
-void QuickTimeDecoder::scaleSurface(const Graphics::Surface *src, Graphics::Surface *dst, const Common::Rational &scaleFactorX, const Common::Rational &scaleFactorY) {
+void QuickTimeDecoder::scaleSurface(const Graphics::Surface *src, Graphics::Surface *dst) {
 	assert(src && dst);
-	//simpel repeat scaling
-	byte *buffer = (byte*)dst->getPixels();
-	byte *LPixels = (byte *)src->getPixels();
-	byte *LPixel;
-	int BytesPerPixel = src->format.bytesPerPixel;
-	int Pitch = src->pitch;
-	int ScaleX = 1.0/scaleFactorX.toDouble();
-	int ScaleY = 1.0 / scaleFactorY.toDouble();
-	for (int i = 0; i < src->h; i++) {
-		for (int n = 0; n < ScaleY; n++) {
-			byte *LPixelsk = LPixels;
-			for (int k = 0; k < (Pitch / BytesPerPixel); k++) {
-				for (int m = 0; m < ScaleX; m++) {
-					LPixel = LPixelsk;
-					for (int bpp = 0; bpp < BytesPerPixel; bpp++) {
-						byte LByte = *LPixel;
-						*buffer = LByte;
-						buffer++;
-						LPixel++;
-					}
-				}
-				LPixelsk += BytesPerPixel;
-			}
-		}
-		LPixels += Pitch;
-	}
+	Graphics::scaleBlit(
+		(byte *)dst->getPixels(), (byte *)src->getPixels(),
+		dst->pitch, src->pitch, dst->w, dst->h, src->w, src->h, dst->format);
 }
 
 QuickTimeDecoder::VideoSampleDesc::VideoSampleDesc(Common::QuickTimeParser::Track *parentTrack, uint32 codecTag) : Common::QuickTimeParser::SampleDesc(parentTrack, codecTag) {
@@ -568,7 +546,7 @@ const Graphics::Surface *QuickTimeDecoder::VideoTrackHandler::decodeNextFrame() 
 			_scaledSurface->create(getScaledWidth().toInt(), getScaledHeight().toInt(), getPixelFormat());
 		}
 
-		_decoder->scaleSurface(frame, _scaledSurface, _parent->scaleFactorX, _parent->scaleFactorY);
+		_decoder->scaleSurface(frame, _scaledSurface);
 		return _scaledSurface;
 	}
 

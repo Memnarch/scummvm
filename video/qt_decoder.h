@@ -84,8 +84,7 @@ private:
 	bool _hasHighResStream = false;
 
 	Graphics::Surface *_scaledSurface;
-	void scaleSurface(const Graphics::Surface *src, Graphics::Surface *dst,
-			const Common::Rational &scaleFactorX, const Common::Rational &scaleFactorY);
+	void scaleSurface(const Graphics::Surface *src, Graphics::Surface *dst);
 
 	class VideoSampleDesc : public Common::QuickTimeParser::SampleDesc {
 	public:
