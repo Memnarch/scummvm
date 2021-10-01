@@ -774,8 +774,8 @@ const Graphics::Surface *QuickTimeDecoder::VideoTrackHandler::bufferNextFrame() 
 		delete PacketData;
 		return 0;
 	}
-
-	const Graphics::Surface *frame = entry->_videoCodec->decodeFrame(*frameData);
+	//if highres, we always use full stream as we expect WMF
+	const Graphics::Surface *frame = entry->_videoCodec->decodeFrame(entry->_videoCodec->IsHighRes() ? *_decoder->_fd : * frameData);
 	delete PacketData;
 
 	// Update the palette

@@ -164,6 +164,8 @@ protected:
 		Common::String name;
 	};
 
+	Common::String GetResourceFileName(const Resource &res) const;
+
 	typedef Common::HashMap<uint16, Resource> ResourceMap;
 	typedef Common::HashMap<uint32, ResourceMap> TypeMap;
 	TypeMap _types;

@@ -101,13 +101,7 @@ Common::SeekableReadStream *Archive::getResource(uint32 tag, uint16 id) {
 
 	if ((tag == ID_TBMP) || (tag == ID_TMOV)) {
 
-		Common::String ResName = getName(tag, id);
-		int index = ResName.find('/', 0);
-		while (index > -1) 
-		{
-			ResName.replace((uint32)index, 1, "_");
-			index = ResName.find('/', index);
-		}
+		Common::String ResName = GetResourceFileName(res);
 		Common::String ResId = Common::String::format("%d", id);
 
 		Common::File *file = new Common::File();
@@ -138,7 +132,22 @@ uint32 Archive::getOffset(uint32 tag, uint16 id) const {
 	if (!resMap.contains(id))
 		error("Archive does not contain '%s' %04x", tag2str(tag), id);
 
-	return resMap[id].offset;
+	const Resource &res = resMap[id];
+	//first check if the resource exists for sideloading. Those have no offset!
+	if ((tag == ID_TBMP) || (tag == ID_TMOV)) {
+		Common::String ResName = GetResourceFileName(res);
+		Common::String ResId = Common::String::format("%d", id);
+		if ((ResName != "" && Common::File::exists(ResName)) || (ResName == "" && Common::File::exists(ResId))) {
+			return 0;
+		}
+
+		if (zip) {
+			if ((ResName != "" && zip->hasFile(ResName)) || (ResName == "" && zip->hasFile(ResId))) {
+				return 0;
+			}
+		}
+	}
+	return res.offset;
 }
 
 uint16 Archive::findResourceID(uint32 tag, const Common::String &resName) const {
@@ -206,6 +215,16 @@ void Archive::offsetResourceIDs(uint32 type, uint16 startId, int16 increment) {
 	}
 
 	_types[type] = newResMap;
+}
+
+Common::String Archive::GetResourceFileName(const Resource &res) const {
+	Common::String ResName = res.name;
+	int index = ResName.find('/', 0);
+	while (index > -1) {
+		ResName.replace((uint32)index, 1, "_");
+		index = ResName.find('/', index);
+	}
+	return ResName;
 }
 
 // Mohawk Archive code
