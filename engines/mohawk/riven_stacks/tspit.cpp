@@ -28,6 +28,7 @@
 #include "mohawk/riven_graphics.h"
 #include "mohawk/riven_inventory.h"
 #include "mohawk/riven_video.h"
+#include "mohawk/resource.h"
 
 #include "common/events.h"
 
@@ -193,10 +194,10 @@ void TSpit::xthideinventory(const ArgumentArray &args) {
 
 // Marble Puzzle related constants
 static const uint32 kMarbleCount = 6;
-static const int kSmallMarbleWidth = 4;
-static const int kSmallMarbleHeight = 2;
+static const int kSmallMarbleWidth = 4 * Riven_Scale;
+static const int kSmallMarbleHeight = 2 * Riven_Scale;
 //static const int kLargeMarbleSize = 8;
-static const int kMarbleHotspotSize = 13;
+static const int kMarbleHotspotSize = 13 * Riven_Scale;
 static const char *s_marbleNames[] = { "tred", "torange", "tyellow", "tgreen", "tblue", "tviolet" };
 
 // Marble Puzzle helper functions
@@ -219,8 +220,8 @@ static byte getMarbleY(uint32 var) { // Give that that Y you old hag! </bad Sein
 
 static Common::Rect generateMarbleGridRect(uint16 x, uint16 y) {
 	// x/y in terms of 0!
-	static const int marbleGridOffsetX[] = { 134, 202, 270, 338, 406 };
-	static const int marbleGridOffsetY[] = {  24,  92, 159, 227, 295 };
+	static const int marbleGridOffsetX[] = {134 * Riven_Scale, 202 * Riven_Scale, 270 * Riven_Scale, 338 * Riven_Scale, 406 * Riven_Scale};
+	static const int marbleGridOffsetY[] = {24 * Riven_Scale, 92 * Riven_Scale, 159 * Riven_Scale, 227 * Riven_Scale, 295 * Riven_Scale};
 
 	uint16 offsetX = marbleGridOffsetX[x / 5] + (x % 5) * kMarbleHotspotSize;
 	uint16 offsetY = marbleGridOffsetY[y / 5] + (y % 5) * kMarbleHotspotSize;
@@ -283,14 +284,14 @@ void TSpit::xt7600_setupmarbles(const ArgumentArray &args) {
 			// (Note that this is still drawn even if the waffle is down)
 			static const uint16 defaultX[] = { 375, 377, 379, 381, 383, 385 };
 			static const uint16 defaultY[] = { 253, 257, 261, 265, 268, 273 };
-			_vm->_gfx->copyImageToScreen(baseBitmapId + i, defaultX[i], defaultY[i], defaultX[i] + kSmallMarbleWidth, defaultY[i] + kSmallMarbleHeight);
+			_vm->_gfx->copyImageToScreen(baseBitmapId + i, defaultX[i] * Riven_Scale, defaultY[i] * Riven_Scale, defaultX[i] * Riven_Scale + kSmallMarbleWidth, defaultY[i] * Riven_Scale + kSmallMarbleHeight);
 		} else if (waffleDown) {
 			// The marble is on the grid and the waffle is down
 			// (Nothing to draw here)
 		} else {
 			// The marble is on the grid and the waffle is up
-			int marbleX = (int)floor(getMarbleX(var) * yAdjusts[getMarbleY(var)] + xPosOffsets[getMarbleY(var)] + 0.5);
-			int marbleY = yPosOffsets[getMarbleY(var)];
+			int marbleX = (int)floor(getMarbleX(var) * yAdjusts[getMarbleY(var)] * Riven_Scale + xPosOffsets[getMarbleY(var)] * Riven_Scale + 0.5 * Riven_Scale);
+			int marbleY = yPosOffsets[getMarbleY(var)] * Riven_Scale;
 			_vm->_gfx->copyImageToScreen(baseBitmapId + i, marbleX, marbleY, marbleX + kSmallMarbleWidth, marbleY + kSmallMarbleHeight);
 		}
 	}
@@ -333,10 +334,10 @@ void TSpit::drawMarbles() {
 
 		Common::Rect rect = marbleHotspot->getRect();
 		// Trim the rect down a bit
-		rect.left += 3;
-		rect.top += 3;
-		rect.right -= 2;
-		rect.bottom -= 2;
+		rect.left += 3 * Riven_Scale;
+		rect.top += 3 * Riven_Scale;
+		rect.right -= 2 * Riven_Scale;
+		rect.bottom -= 2 * Riven_Scale;
 		_vm->_gfx->drawExtrasImage(i + 200, rect);
 	}
 	_vm->_gfx->applyScreenUpdate();
