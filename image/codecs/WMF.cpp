@@ -7,6 +7,7 @@
 #include<mfidl.h>
 #include<mfreadwrite.h>
 #include<Mferror.h>
+#include<propvarutil.h>
 
 
 void Check(const HRESULT AResult) {
@@ -164,6 +165,16 @@ const Graphics::Surface *Image::WMFDecoder::decodeFrame(Common::SeekableReadStre
 		SafeRelease(&sample);
 	}
 	return _target;
+}
+
+void Image::WMFDecoder::Seek(Audio::Timestamp time) {
+	if (_reader) {
+		const int CMSToTimeUnit = 10000;//timeunit is in 100 nanosecs steps
+		PROPVARIANT pos;
+		InitPropVariantFromInt64(time.msecs() * CMSToTimeUnit, & pos);
+		Check(_reader->SetCurrentPosition(GUID_NULL, pos));
+		PropVariantClear(&pos);
+	}
 }
 
 Image::WMFStream::WMFStream(Common::SeekableReadStream* Stream): IMFByteStream(), _Stream(Stream) {

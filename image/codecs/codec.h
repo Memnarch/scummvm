@@ -25,6 +25,7 @@
 
 #include "graphics/surface.h"
 #include "graphics/pixelformat.h"
+#include <audio\timestamp.h>
 
 namespace Common {
 class SeekableReadStream;
@@ -114,6 +115,7 @@ public:
 	//return if extra scaling for this codec is needed. Allows us to specify when we use a codec for prescaled videos or if it's a classic and needs scaling
 
 	virtual bool IsHighRes() { return false; }
+	virtual void Seek(Audio::Timestamp time) {}
 
 	/**
 	 * Create a dither table, as used by QuickTime codecs.

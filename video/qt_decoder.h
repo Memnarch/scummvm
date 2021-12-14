@@ -158,6 +158,8 @@ private:
 		const byte *_curPalette;
 		mutable bool _dirtyPalette;
 		bool _reversed;
+		bool _seekNeeded;
+		Audio::Timestamp _seekTarget;
 
 		// Forced dithering of frames
 		byte *_forcedDitherPalette;

@@ -3,6 +3,7 @@
 #include<mfidl.h>
 #include<mfreadwrite.h>;
 #include "image/codecs/codec.h";
+#include <audio\timestamp.h>
 
 
 
@@ -99,6 +100,7 @@ namespace Image {
 		Graphics::PixelFormat getPixelFormat() const { return Graphics::PixelFormat(4, 8, 8, 8, 0, 16, 8, 0, 0); };
 
 		bool IsHighRes() override { return true; }
+		void Seek(Audio::Timestamp time) override;
 	private:
 		IMFSourceReader *_reader;
 		IMFByteStream *_byteStream;

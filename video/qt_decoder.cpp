@@ -404,6 +404,8 @@ bool QuickTimeDecoder::VideoTrackHandler::seek(const Audio::Timestamp &requested
 
 	// Now we're in the edit and need to figure out what frame we need
 	Audio::Timestamp time = requestedTime.convertToFramerate(_parent->timeScale);
+	_seekNeeded = true;
+	_seekTarget = time;
 	while (getRateAdjustedFrameTime() < (uint32)time.totalNumberOfFrames()) {
 		_curFrame++;
 		if (_durationOverride >= 0) {
@@ -426,7 +428,7 @@ bool QuickTimeDecoder::VideoTrackHandler::seek(const Audio::Timestamp &requested
 		setReverse(true);
 	} else {
 		// Handle the keyframe here
-		int32 destinationFrame = _curFrame + 1;
+		int32 destinationFrame = _curFrame +1;
 
 		assert(destinationFrame < (int32)_parent->frameCount);
 		_curFrame = findKeyFrame(destinationFrame) - 1;
@@ -775,6 +777,10 @@ const Graphics::Surface *QuickTimeDecoder::VideoTrackHandler::bufferNextFrame() 
 		return 0;
 	}
 	//if highres, we always use full stream as we expect WMF
+	if (_seekNeeded) {
+		entry->_videoCodec->Seek(_seekTarget);
+		_seekNeeded = false;
+	}
 	const Graphics::Surface *frame = entry->_videoCodec->decodeFrame(entry->_videoCodec->IsHighRes() ? *_decoder->_fd : * frameData);
 	delete PacketData;
 
