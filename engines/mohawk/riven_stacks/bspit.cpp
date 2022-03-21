@@ -72,10 +72,10 @@ void BSpit::labBookDrawDomeCombination() const {
 	// The images for the numbers are tBMP's 364 through 368
 	// The start point is at (240, 82)
 	uint32 domeCombo = _vm->_vars["adomecombo"];
-	static const uint16 kNumberWidth = 32;
-	static const uint16 kNumberHeight = 24;
-	static const uint16 kDstX = 240;
-	static const uint16 kDstY = 82;
+	static const uint16 kNumberWidth = 32 * Riven_Scale;
+	static const uint16 kNumberHeight = 24 * Riven_Scale;
+	static const uint16 kDstX = 240 * Riven_Scale;
+	static const uint16 kDstY = 82 * Riven_Scale;
 	byte numCount = 0;
 
 	for (int bitPos = 24; bitPos >= 0; bitPos--) {

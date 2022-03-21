@@ -256,10 +256,10 @@ void ASpit::cathBookDrawTelescopeCombination() {// Draw the telescope combinatio
 	// The images for the numbers are tBMP's 13 through 17.
 	// The start point is at (156, 247)
 	uint32 teleCombo = _vm->_vars["tcorrectorder"];
-	static const uint16 kNumberWidth = 32;
-	static const uint16 kNumberHeight = 25;
-	static const uint16 kDstX = 156;
-	static const uint16 kDstY = 247;
+	static const uint16 kNumberWidth = 32 * Riven_Scale;
+	static const uint16 kNumberHeight = 25 * Riven_Scale;
+	static const uint16 kDstX = 156 * Riven_Scale;
+	static const uint16 kDstY = 247 * Riven_Scale;
 
 	for (byte i = 0; i < 5; i++) {
 			uint16 offset = (getComboDigit(teleCombo, i) - 1) * kNumberWidth;
